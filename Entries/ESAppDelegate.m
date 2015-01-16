@@ -7,16 +7,56 @@
 //
 
 #import "ESAppDelegate.h"
+#import "Entry.h"
 
 @implementation ESAppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
+    NSArray *entriesFromDefaults = [self loadEntriesFromDefaults];
+    NSMutableArray *mutableEntriesFromDefaults = [NSMutableArray arrayWithArray:entriesFromDefaults];
+    
+    
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+    NSMutableDictionary *entryDictionary = [NSMutableDictionary dictionary];
+    [entryDictionary setValue:@"Best Day" forKey:titleKey];
+    [entryDictionary setValue:@"it was a good day" forKey:contentKey];
+    [entryDictionary setValue:[NSDate date] forKey:dateCreatedKey];
+    
+    
+    Entry *entry = [[Entry alloc]initWithDictionary:entryDictionary];
+    [mutableEntriesFromDefaults addObject:entry];
+    
+    [self storeEntriesToDefaults:mutableEntriesFromDefaults];
+    
     // Override point for customization after application launch.
     self.window.backgroundColor = [UIColor whiteColor];
     [self.window makeKeyAndVisible];
+    
+    
     return YES;
+}
+
+-(NSArray *)loadEntriesFromDefaults{
+    
+    NSArray *entryDictionaries = [[NSUserDefaults standardUserDefaults] objectForKey:@"Entries"];
+    
+    NSMutableArray *mutableEntries = [NSMutableArray array];
+    for (NSDictionary *entryDictionary in entryDictionaries) {
+        Entry *entry = [[Entry alloc]initWithDictionary:entryDictionary];
+        [mutableEntries addObject:entry];
+    }
+    return mutableEntries;
+}
+
+-(void)storeEntriesToDefaults:(NSArray *)entries{
+    NSMutableArray *mutableEntryDictionaries = [NSMutableArray array];
+    for (Entry *entry in entries) {
+        NSDictionary *entryDictionary = [entry entryDictionary];
+        [mutableEntryDictionaries addObject:entryDictionary];
+    }
+    [[NSUserDefaults standardUserDefaults] setObject:mutableEntryDictionaries forKey:@"Entries"];
+    [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
 - (void)applicationWillResignActive:(UIApplication *)application
